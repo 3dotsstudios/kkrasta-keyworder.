@@ -24,7 +24,7 @@ git add .
 git commit -m "Add colorful KKrasta Keyworder with Windows build"
 
 # Push to GitHub
-git remote add origin https://github.com/yourusername/kkrasta-keyworder.git
+git remote add origin https://github.com/3dotsstudios/kkrasta-keyworder.git
 git push -u origin main
 ```
 
