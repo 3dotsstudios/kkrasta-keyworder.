@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  windows-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.windows
+    volumes:
+      - ./dist-windows:/app/dist
+    container_name: kkrasta-windows-builder
+    platform: windows/amd64

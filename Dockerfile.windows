@@ -1,0 +1,24 @@
+# Use Windows-based Python image for building Windows executable
+FROM python:3.9-windowsservercore
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install PyInstaller
+RUN pip install pyinstaller
+
+# Copy the application files
+COPY kkrasta_keyworder.py .
+
+# Create the Windows executable
+RUN pyinstaller --onefile --name "KKrasta-Keyworder.exe" --distpath /app/dist --workpath /app/build kkrasta_keyworder.py
+
+# Set the output directory as volume
+VOLUME ["/app/dist"]
+
+# Default command
+CMD ["cmd"]

@@ -1,0 +1,61 @@
+# Use Ubuntu base image with Wine for Windows executable building
+FROM ubuntu:20.04
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Wine and Python dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    software-properties-common \
+    gnupg2 \
+    && wget -nc https://dl.winehq.org/wine-builds/winehq.key \
+    && apt-key add winehq.key \
+    && add-apt-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main' \
+    && apt-get update \
+    && apt-get install -y \
+    winehq-stable \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Wine environment
+ENV WINEPREFIX=/root/.wine
+ENV WINEARCH=win64
+ENV DISPLAY=:99
+
+# Initialize Wine
+RUN Xvfb :99 -screen 0 1024x768x16 & \
+    sleep 5 && \
+    winecfg && \
+    sleep 5
+
+# Download and install Python for Windows
+RUN Xvfb :99 -screen 0 1024x768x16 & \
+    sleep 5 && \
+    wget https://www.python.org/ftp/python/3.9.13/python-3.9.13-amd64.exe && \
+    wine python-3.9.13-amd64.exe /quiet InstallAllUsers=1 PrependPath=1 && \
+    sleep 10
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and application files
+COPY requirements.txt .
+COPY kkrasta_keyworder.py .
+
+# Install Python packages and PyInstaller in Wine
+RUN Xvfb :99 -screen 0 1024x768x16 & \
+    sleep 5 && \
+    wine python -m pip install --upgrade pip && \
+    wine python -m pip install -r requirements.txt && \
+    wine python -m pip install pyinstaller
+
+# Build script
+COPY build-wine.sh /app/
+RUN chmod +x /app/build-wine.sh
+
+# Create output directory
+RUN mkdir -p /app/dist
+
+# Default command
+CMD ["/app/build-wine.sh"]
